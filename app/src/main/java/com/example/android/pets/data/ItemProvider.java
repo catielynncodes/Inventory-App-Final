@@ -1,6 +1,7 @@
 package com.example.android.pets.data;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -8,6 +9,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+
+import static com.example.android.pets.data.ItemContract.CONTENT_AUTHORITY;
+import static com.example.android.pets.data.ItemContract.PATH_ITEMS;
 
 /**
  * {@link ContentProvider} for inventory app.
@@ -48,14 +52,24 @@ public class ItemProvider extends ContentProvider {
         // should recognize. All paths added to the UriMatcher have a corresponding code to return
         // when a match is found.
 
-        sUriMatcher.addURI(ItemContract.CONTENT_AUTHORITY, ItemContract.PATH_ITEMS, ITEMS);
-        sUriMatcher.addURI(ItemContract.CONTENT_AUTHORITY, ItemContract.PATH_ITEMS + "/#", ITEM_ID);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_ITEMS, ITEMS);
+        sUriMatcher.addURI(CONTENT_AUTHORITY, PATH_ITEMS + "/#", ITEM_ID);
     }
 
-        // Perform the query for the given URI. Use the given projection, selection, selection arguments, and sort order.
+    // The MIME type of the {@link #CONTENT_URI} for a list of items.
+    public static final String CONTENT_LIST_TYPE =
+            ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ITEMS;
+
+    // The MIME type of the {@link #CONTENT_URI} for a single item.
+    public static final String CONTENT_ITEM_TYPE =
+            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ITEMS;
+
+
+    // Perform the query for the given URI. Use the given projection, selection, selection arguments, and sort order.
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
+
         // Get readable database
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
 
@@ -244,13 +258,36 @@ public class ItemProvider extends ContentProvider {
     // Delete the data at the given selection and selection arguments.
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        // Get writeable database
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case ITEMS:
+                // Delete all rows that match the selection and selection args
+                return database.delete(ItemContract.ItemEntry.TABLE_NAME, selection, selectionArgs);
+            case ITEM_ID:
+                // Delete a single row given by the ID in the URI
+                selection = ItemContract.ItemEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return database.delete(ItemContract.ItemEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
     }
 
     // Returns the MIME type of data for the content URI.
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case ITEMS:
+                return CONTENT_LIST_TYPE;
+            case ITEM_ID:
+                return CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
     }
 
 }
