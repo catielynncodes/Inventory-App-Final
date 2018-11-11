@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -103,6 +104,15 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // Receive the new content URI that will allow us to access notebook data in the future.
         Uri newUri = getContentResolver().insert(ItemEntry.CONTENT_URI, values);
     }
+
+    /**
+     * Helper method to delete all items in the database.
+     */
+    private void deleteAllItems() {
+        int rowsDeleted = getContentResolver().delete(ItemEntry.CONTENT_URI, null, null);
+        Log.v("CatalogActivity", rowsDeleted + " rows deleted from pet database");
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu options from the res/menu/menu_catalog.xml file.
@@ -121,7 +131,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteAllItems();
                 return true;
         }
         return super.onOptionsItemSelected(item);

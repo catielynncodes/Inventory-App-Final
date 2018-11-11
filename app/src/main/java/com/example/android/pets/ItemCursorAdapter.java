@@ -2,6 +2,7 @@ package com.example.android.pets;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +44,8 @@ public class ItemCursorAdapter extends CursorAdapter {
     }
 
     /**
-     * This method binds the pet data (in the current row pointed to by cursor) to the given
-     * list item layout. For example, the name for the current pet can be set on the name TextView
+     * This method binds the item data (in the current row pointed to by cursor) to the given
+     * list item layout. For example, the name for the current item can be set on the name TextView
      * in the list item layout.
      *
      * @param view    Existing view, returned earlier by newView() method
@@ -59,7 +60,7 @@ public class ItemCursorAdapter extends CursorAdapter {
         TextView priceTextView = (TextView) view.findViewById(R.id.price);
         TextView quantityTextView = (TextView) view.findViewById(R.id.quantity);
 
-        // Find the columns of item attributes that we're interested in
+        // Find the columns of pet attributes that we're interested in
         int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
         int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
         int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
@@ -68,6 +69,18 @@ public class ItemCursorAdapter extends CursorAdapter {
         String itemName = cursor.getString(nameColumnIndex);
         String itemPrice = cursor.getString(priceColumnIndex);
         String itemQuantity = cursor.getString(quantityColumnIndex);
+
+        // If the item price is empty string or null, then use some default text
+        // that says "Unknown price", so the TextView isn't blank.
+        if (TextUtils.isEmpty(itemPrice)) {
+            itemPrice = context.getString(R.string.unknown_price);
+        }
+
+        // If the item quantity is empty string or null, then use some default text
+        // that says "Unknown quantity", so the TextView isn't blank.
+        if (TextUtils.isEmpty(itemQuantity)) {
+            itemQuantity = context.getString(R.string.unknown_quantity);
+        }
 
         // Update the TextViews with the attributes for the current item
         nameTextView.setText(itemName);

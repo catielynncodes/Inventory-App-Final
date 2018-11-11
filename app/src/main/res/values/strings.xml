@@ -15,10 +15,40 @@
     <!-- Title for the acitivty to edit an existing item [CHAR LIMIT=20] -->
     <string name="editor_activity_title_edit_item">Edit Item</string>
 
-    <!-- Label for editor menu option to save pet and leave editor [CHAR LIMIT=20] -->
+    <!-- Toast message in editor when current pet was successfully updated [CHAR LIMIT=NONE] -->
+    <string name="editor_update_item_successful">Item updated</string>
+
+    <!-- Toast message in editor when current pet has failed to be updated [CHAR LIMIT=NONE] -->
+    <string name="editor_update_item_failed">Error with updating item</string>
+
+    <!-- Dialog message when user is leaving editor but hasn't saved changes [CHAR LIMIT=NONE] -->
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+
+    <!-- Dialog button text for the option to discard a user's changes [CHAR LIMIT=20] -->
+    <string name="discard">Discard</string>
+
+    <!-- Dialog button text for the option to keep editing the current pet [CHAR LIMIT=20] -->
+    <string name="keep_editing">Keep Editing</string>
+
+    <!-- Toast message in editor when current item was successfully deleted [CHAR LIMIT=NONE] -->
+    <string name="editor_delete_item_successful">Item deleted</string>
+
+    <!-- Toast message in editor when current item has failed to be deleted [CHAR LIMIT=NONE] -->
+    <string name="editor_delete_item_failed">Error with deleting item</string>
+
+    <!-- Dialog message to ask the user to confirm deleting the current item [CHAR LIMIT=NONE] -->
+    <string name="delete_dialog_msg">Delete this item?</string>
+
+    <!-- Dialog button text for the option to confirm deleting the current item [CHAR LIMIT=20] -->
+    <string name="delete">Delete</string>
+
+    <!-- Dialog button text for the option to cancel deletion of the current item [CHAR LIMIT=20] -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Label for editor menu option to save item and leave editor [CHAR LIMIT=20] -->
     <string name="action_save">Save</string>
 
-    <!-- Label for editor overflow menu option that deletes the current pet [CHAR LIMIT=20] -->
+    <!-- Label for editor overflow menu option that deletes the current item [CHAR LIMIT=20] -->
     <string name="action_delete">Delete</string>
 
     <!-- Label for overview category of attributes in the editor [CHAR LIMIT=30] -->
@@ -38,6 +68,12 @@
 
     <!-- Text hint for name field in the editor [CHAR LIMIT=30] -->
     <string name="hint_item_supplier_phone">Supplier Phone No.</string>
+
+    <!-- Label for the item's price if the price is unknown [CHAR LIMIT=20] -->
+    <string name="unknown_price">Unknown price</string>
+
+    <!-- Label for the item's quantity if the quantity is unknown [CHAR LIMIT=20] -->
+    <string name="unknown_quantity">Unknown quantity</string>
 
     <!-- Toast message in editor when new item has been successfully inserted [CHAR LIMIT=NONE] -->
     <string name="editor_insert_item_successful">Item saved</string>
