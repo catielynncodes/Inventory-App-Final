@@ -10,7 +10,10 @@
     <string name="action_delete_all_entries">Delete All Items</string>
 
     <!-- Title for the activity to add a new pet [CHAR LIMIT=20] -->
-    <string name="editor_activity_title_new_pet">Add an Item</string>
+    <string name="editor_activity_title_new_item">Add an Item</string>
+
+    <!-- Title for the acitivty to edit an existing item [CHAR LIMIT=20] -->
+    <string name="editor_activity_title_edit_item">Edit Item</string>
 
     <!-- Label for editor menu option to save pet and leave editor [CHAR LIMIT=20] -->
     <string name="action_save">Save</string>

@@ -106,15 +106,21 @@ public class ItemProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
+
+        // Set notification URI on the cursor so we know what content URI the Cursor was created for.
+        // If the data at this URI changes, then we know we need to update the Cursor.
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        // Return the cursor
         return cursor;
     }
+
 
     // Insert new data into the provider with the given ContentValues.
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
         final int match = sUriMatcher.match(uri);
         switch (match) {
-
             case ITEMS:
                 return insertItem(uri, contentValues);
             default:
@@ -169,6 +175,9 @@ public class ItemProvider extends ContentProvider {
             return null;
         }
 
+        // Notify all listeners that the data has changed for the item content URI
+        getContext().getContentResolver().notifyChange(uri, null);
+
         // return the new URI with the ID (of newly inserted row) appended to the end of it
         return ContentUris.withAppendedId(uri, id);
     }
@@ -213,7 +222,7 @@ public class ItemProvider extends ContentProvider {
         // check that the price value is valid.
         if (values.containsKey(ItemContract.ItemEntry.COLUMN_ITEM_PRICE)) {
             String price = values.getAsString(ItemContract.ItemEntry.COLUMN_ITEM_PRICE);
-            if (price==null) {
+            if (price == null) {
                 throw new IllegalArgumentException("Item requires a price amount");
             }
         }
@@ -222,7 +231,7 @@ public class ItemProvider extends ContentProvider {
         // check that the quantity value is valid.
         if (values.containsKey(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY)) {
             String quantity = values.getAsString(ItemContract.ItemEntry.COLUMN_ITEM_QUANTITY);
-            if (quantity==null) {
+            if (quantity == null) {
                 throw new IllegalArgumentException("Item requires a quantity amount");
             }
         }
@@ -231,7 +240,7 @@ public class ItemProvider extends ContentProvider {
         // check that the supplier name value is valid.
         if (values.containsKey(ItemContract.ItemEntry.COLUMN_ITEM_SUPPLIER_NAME)) {
             String supplierName = values.getAsString(ItemContract.ItemEntry.COLUMN_ITEM_SUPPLIER_NAME);
-            if (supplierName==null) {
+            if (supplierName == null) {
                 throw new IllegalArgumentException("Item requires a supplier name");
             }
         }
@@ -240,7 +249,7 @@ public class ItemProvider extends ContentProvider {
         // check that the supplier phone value is valid.
         if (values.containsKey(ItemContract.ItemEntry.COLUMN_ITEM_SUPPLIER_PHONE)) {
             String supplierPhone = values.getAsString(ItemContract.ItemEntry.COLUMN_ITEM_SUPPLIER_NAME);
-            if (supplierPhone==null) {
+            if (supplierPhone == null) {
                 throw new IllegalArgumentException("Item requires a supplier phone");
             }
         }
@@ -251,29 +260,51 @@ public class ItemProvider extends ContentProvider {
         }// Otherwise, get writable database to update the data
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
 
-        // Returns the number of database rows affected by the update statement
-        return database.update(ItemContract.ItemEntry.TABLE_NAME, values, selection, selectionArgs);
+        // Perform the update on the database and get the number of rows affected
+        int rowsUpdated = database.update(ItemContract.ItemEntry.TABLE_NAME, values, selection, selectionArgs);
+
+        // If 1 or more rows were updated, then notify all listeners that the data at the
+        // given URI has changed
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows updated
+        return rowsUpdated;
     }
 
     // Delete the data at the given selection and selection arguments.
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // Get writeable database
+        // Get writable database
         SQLiteDatabase database = mDbHelper.getWritableDatabase();
+
+        // Track the number of rows that were deleted
+        int rowsDeleted;
 
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case ITEMS:
                 // Delete all rows that match the selection and selection args
-                return database.delete(ItemContract.ItemEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(ItemContract.ItemEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             case ITEM_ID:
                 // Delete a single row given by the ID in the URI
                 selection = ItemContract.ItemEntry._ID + "=?";
                 selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
-                return database.delete(ItemContract.ItemEntry.TABLE_NAME, selection, selectionArgs);
+                rowsDeleted = database.delete(ItemContract.ItemEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Deletion is not supported for " + uri);
         }
+        // If 1 or more rows were deleted, then notify all listeners that the data at the
+        // given URI has changed
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        // Return the number of rows deleted
+        return rowsDeleted;
     }
 
     // Returns the MIME type of data for the content URI.

@@ -1,7 +1,11 @@
 package com.example.android.pets;
 
-import android.content.ClipData;
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
+import android.content.Intent;
+import android.content.Loader;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,7 +18,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.android.pets.data.ItemContract.ItemEntry;
@@ -23,7 +26,13 @@ import com.example.android.pets.data.ItemDbHelper;
 /**
  * Allows user to create a new item or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    // Identifier for the item loader
+    private static final int EXISTING_ITEM_LOADER = 0;
+
+    // Content URI for the existing item (null if it's a new item)
+    private Uri mCurrentItemUri;
 
     /** EditText field to enter the item's name */
     private EditText mNameEditText;
@@ -45,6 +54,23 @@ public class EditorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
+
+        // Examine the intent that was used to launch this activity,
+        // in order to figure out if we're creating a new item or updating an existing one.
+        Intent intent = getIntent();
+        mCurrentItemUri = intent.getData();
+        // If the item DOES NOT contain an item content URI, then we know we are creating a new item.
+        if (mCurrentItemUri == null) {
+            // This is a new item, so change the app bar to say "Add an Item"
+            setTitle(getString(R.string.editor_activity_title_new_item));
+        } else {
+            // Otherwise this is an existing item, so change the app bar to say "Edit an Item"
+            setTitle(getString(R.string.editor_activity_title_edit_item));
+
+            // Initialize a loader to read the item data from the database
+            // and display the current values in the editor
+            getLoaderManager().initLoader(EXISTING_ITEM_LOADER, null, this);
+        }
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.edit_item_name);
@@ -121,4 +147,70 @@ public class EditorActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        if (mCurrentItemUri == null) {
+            return null;
+        }
+        // Since the editor shows all item attributes, define a projection that contains
+        // all columns from the items table
+        String[] projection = {
+                ItemEntry._ID,
+                ItemEntry.COLUMN_ITEM_NAME,
+                ItemEntry.COLUMN_ITEM_PRICE,
+                ItemEntry.COLUMN_ITEM_QUANTITY,
+                ItemEntry.COLUMN_ITEM_SUPPLIER_NAME,
+                ItemEntry.COLUMN_ITEM_SUPPLIER_PHONE};
+
+        // This loader will execute the ContentProvider's query method on a background thread.
+        return new CursorLoader(this,       // Parent activity context
+                mCurrentItemUri,                    // Query the content URI for the current item
+                projection,                         // Columns to include in the resulting cursor
+                null,                       // No selection clause
+                null,                   // No selection arguments
+                null);                       // Default sort order
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Bail early if the cursor is null or there is less than 1 row in the cursor
+        if (cursor == null || cursor.getCount() < 1) {
+            return;
+        }
+
+        // Proceed with moving to the first row of the cursor and reading data from it
+        // (This should be the only row in the cursor)
+        if (cursor.moveToFirst()) {
+            // Find the columns of item attributes that we're interested in
+            int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
+            int priceColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_PRICE);
+            int quantityColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY);
+            int supplierNameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_SUPPLIER_NAME);
+            int supplierPhoneColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_SUPPLIER_PHONE);
+
+            // Extract out the value from the Cursor for the given column index
+            String name = cursor.getString(nameColumnIndex);
+            String price = cursor.getString(priceColumnIndex);
+            String quantity = cursor.getString(quantityColumnIndex);
+            String supplierName = cursor.getString(supplierNameColumnIndex);
+            String supplierPhone = cursor.getString(supplierPhoneColumnIndex);
+
+            // Update the views on the screen with the values from the database
+            mNameEditText.setText(name);
+            mPriceEditText.setText(price);
+            mQuantityEditText.setText(quantity);
+            mSupplierNameEditText.setText(supplierName);
+            mSupplierPhoneEditText.setText(supplierPhone);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // If the loader is invalidated, clear out all the data from the input fields.
+        mNameEditText.setText("");
+        mPriceEditText.setText("");
+        mQuantityEditText.setText("");
+        mSupplierNameEditText.setText("");
+        mSupplierPhoneEditText.setText("");
+    }
 }
