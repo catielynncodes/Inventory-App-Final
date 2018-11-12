@@ -202,11 +202,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Save item to database
-                saveItem();
-                // Exit the activity
-                finish();
-                // Respond to a click on the "Delete" menu option
+                if (mNameEditText == null || mPriceEditText == null || mQuantityEditText == null ||
+                        mSupplierNameEditText == null || mSupplierPhoneEditText == null) {
+                    Toast.makeText(this, "Please make sure no fields are empty", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Save item to database
+                    saveItem();
+                    // Exit the activity
+                    finish();
+                    break;
+                }
+            // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 // Pop up confirmation dialog for deletion
                 showDeleteConfirmationDialog();
