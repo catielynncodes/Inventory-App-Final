@@ -205,6 +205,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 if (mNameEditText == null || mPriceEditText == null || mQuantityEditText == null ||
                         mSupplierNameEditText == null || mSupplierPhoneEditText == null) {
                     Toast.makeText(this, "Please make sure no fields are empty", Toast.LENGTH_SHORT).show();
+                    break;
                 } else {
                     // Save item to database
                     saveItem();
