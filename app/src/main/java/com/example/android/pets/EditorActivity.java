@@ -202,8 +202,15 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                if (mNameEditText == null || mPriceEditText == null || mQuantityEditText == null ||
-                        mSupplierNameEditText == null || mSupplierPhoneEditText == null) {
+                // Read from input fields
+                // Use trim to eliminate leading or trailing white space
+                String nameString = mNameEditText.getText().toString().trim();
+                String priceString = mPriceEditText.getText().toString().trim();
+                String quantityString = mQuantityEditText.getText().toString().trim();
+                String supplierNameString = mSupplierNameEditText.getText().toString().trim();
+                String supplierPhoneString = mSupplierPhoneEditText.getText().toString().trim();
+                if (nameString.isEmpty() || priceString.isEmpty() || quantityString.isEmpty() ||
+                        supplierNameString.isEmpty() || supplierPhoneString.isEmpty()) {
                     Toast.makeText(this, "Please make sure no fields are empty", Toast.LENGTH_SHORT).show();
                     break;
                 } else {

@@ -110,7 +110,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
      */
     private void deleteAllItems() {
         int rowsDeleted = getContentResolver().delete(ItemEntry.CONTENT_URI, null, null);
-        Log.v("CatalogActivity", rowsDeleted + " rows deleted from pet database");
+        Log.v("CatalogActivity", rowsDeleted + " rows deleted from item database");
     }
 
     @Override
