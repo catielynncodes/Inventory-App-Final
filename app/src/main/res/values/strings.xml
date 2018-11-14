@@ -10,7 +10,7 @@
     <string name="action_delete_all_entries">Delete All Items</string>
 
     <!-- Heading that says all EditText fields are required -->
-    <string name="editor_activity_heading">All text fields below are required to be filled in.</string>
+    <string name="editor_activity_heading">All text fields below must be filled in.</string>
 
     <!-- Title for the activity to add a new item [CHAR LIMIT=20] -->
     <string name="editor_activity_title_new_item">Add an Item</string>
