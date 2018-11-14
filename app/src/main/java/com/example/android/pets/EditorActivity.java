@@ -46,6 +46,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private Button mIncreaseQuantityButton;
     private Button mDecreaseQuantityButton;
     private Button mCallSupplierButton;
+    private Button mDeleteItemButton;
 
     /** Boolean flag that keeps track of whether the item has been edited (true) or not (false) */
     private boolean mItemHasChanged = false;
@@ -97,6 +98,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mIncreaseQuantityButton = (Button) findViewById(R.id.quantity_add_button);
         mDecreaseQuantityButton = (Button) findViewById(R.id.quantity_subtract_button);
         mCallSupplierButton = (Button) findViewById(R.id.button_order_item);
+        mDeleteItemButton = (Button) findViewById(R.id.button_delete_item);
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
@@ -107,17 +109,19 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mSupplierNameEditText.setOnTouchListener(mTouchListener);
         mSupplierPhoneEditText.setOnTouchListener(mTouchListener);
 
+        // Adds functionality to increase quantity button
         mIncreaseQuantityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                increaseQuantity();
+                mQuantityEditText.setText(increaseQuantity());
             }
         });
 
+        // Adds functionality to decrease quantity button
         mDecreaseQuantityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                decreaseQuantity();
+                mQuantityEditText.setText(decreaseQuantity());
             }
         });
 
@@ -133,6 +137,14 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
 
+        // Delete the current item
+        mDeleteItemButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDeleteConfirmationDialog();
+            }
+        });
+
     }
 
     @Override
@@ -143,9 +155,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         return true;
     }
 
-    /*
-     * Increase quantity
-     */
+    // Increase quantity
     public String increaseQuantity() {
         int currentQuantity;
         String currentValue = mQuantityEditText.getText().toString();
@@ -158,17 +168,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         return String.valueOf(currentQuantity);
     }
 
-    /*
-     * Decrease quantity and validate that quantity does not go below zero
-     */
+    // Decrease quantity and validate that quantity does not go below zero
     public String decreaseQuantity() {
         int currentQuantity;
         String currentValue = mQuantityEditText.getText().toString();
         currentQuantity = Integer.parseInt(currentValue);
-        if (currentQuantity == 1) {
-            Toast.makeText(this, "Cannot have inventory of zero - item will be deleted on saving", Toast.LENGTH_SHORT).show();
+        if (currentQuantity == 0) {
+            Toast.makeText(this, "Cannot have negative quantity", Toast.LENGTH_SHORT).show();
+            currentQuantity = 0;
+        } else {
+            currentQuantity = currentQuantity - 1;
         }
-        currentQuantity = currentQuantity - 1;
         return String.valueOf(currentQuantity);
     }
 
@@ -399,7 +409,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User clicked the "Delete" button, so delete the pet.
+                // User clicked the "Delete" button, so delete the item.
                 deleteItem();
             }
         });
@@ -440,7 +450,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                         Toast.LENGTH_SHORT).show();
             }
         }
-
         // Close the activity
         finish();
     }

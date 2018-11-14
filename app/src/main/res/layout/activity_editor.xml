@@ -9,6 +9,12 @@
     android:padding="@dimen/activity_margin"
     tools:context=".EditorActivity">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/editor_activity_heading"
+        android:layout_marginBottom="16dp"/>
+
     <!-- Name field -->
     <EditText
         android:id="@+id/edit_item_name"
@@ -38,16 +44,16 @@
             android:layout_weight="2"/>
 
         <Button
-            android:id="@+id/quantity_add_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_button"/>
-
-        <Button
             android:id="@+id/quantity_subtract_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/subtract_button"/>
+
+        <Button
+            android:id="@+id/quantity_add_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_button"/>
 
     </LinearLayout>
 
@@ -69,7 +75,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
 
         <Button
             android:id="@+id/button_order_item"

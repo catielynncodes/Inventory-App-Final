@@ -9,6 +9,9 @@
     <!-- Label for overflow menu option that deletes all item data in the app [CHAR LIMIT=20] -->
     <string name="action_delete_all_entries">Delete All Items</string>
 
+    <!-- Heading that says all EditText fields are required -->
+    <string name="editor_activity_heading">All text fields below are required to be filled in.</string>
+
     <!-- Title for the activity to add a new item [CHAR LIMIT=20] -->
     <string name="editor_activity_title_new_item">Add an Item</string>
 
@@ -81,8 +84,8 @@
     <!-- Toast message in editor when new item has failed to be inserted [CHAR LIMIT=NONE] -->
     <string name="editor_insert_item_failed">Error with saving item</string>
 
-    <!-- Title text for the empty view, which describes the empty dog house image [CHAR LIMIT=50] -->
-    <string name="empty_view_title_text">It\'s a bit lonely here...</string>
+    <!-- Title text for the empty view, which describes the empty box image [CHAR LIMIT=50] -->
+    <string name="empty_view_title_text">It\'s a bit empty here...</string>
 
     <!-- Subtitle text for the empty view that prompts the user to add a item [CHAR LIMIT=50] -->
     <string name="empty_view_subtitle_text">Get started by adding an item!</string>
@@ -92,6 +95,9 @@
 
     <!-- Text for button to delete an item from the list -->
     <string name="button_delete_item">Delete Item</string>
+
+    <!-- Sold button -->
+    <string name="sold_button">Sold</string>
 
     <!-- Plus sign for adding to quantity amount -->
     <string name="add_button">+</string>

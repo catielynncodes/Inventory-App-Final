@@ -1,11 +1,15 @@
 package com.example.android.pets;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
@@ -17,6 +21,10 @@ import com.example.android.pets.data.ItemContract.ItemEntry;
  * how to create list items for each row of item data in the {@link Cursor}.
  */
 public class ItemCursorAdapter extends CursorAdapter {
+
+    //Global variables for book quantity amounts that are updated via button
+    private int itemId;
+    private int quantityValue;
 
     /**
      * Constructs a new {@link ItemCursorAdapter}.
@@ -54,11 +62,12 @@ public class ItemCursorAdapter extends CursorAdapter {
      *                correct row.
      */
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, final Context context, final Cursor cursor) {
         // Find individual views that we want to modify in the list item layout
         TextView nameTextView = (TextView) view.findViewById(R.id.name);
         TextView priceTextView = (TextView) view.findViewById(R.id.price);
         TextView quantityTextView = (TextView) view.findViewById(R.id.quantity);
+        Button soldButton = (Button) view.findViewById(R.id.item_sold_button);
 
         // Find the columns of pet attributes that we're interested in
         int nameColumnIndex = cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_NAME);
@@ -86,5 +95,32 @@ public class ItemCursorAdapter extends CursorAdapter {
         nameTextView.setText(itemName);
         priceTextView.setText(itemPrice);
         quantityTextView.setText(itemQuantity);
+
+        // ------ Added in the following to try and implement Sold Button ------
+
+        // Find the cursor position
+        final int position = cursor.getPosition();
+
+        // Set an onClickListener for the Sold button to decrease quantity
+        soldButton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Set the cursor to the position of the button clicked
+                cursor.moveToPosition(position);
+                //Get the item ID of the current row
+                itemId = cursor.getInt(cursor.getColumnIndex(ItemEntry._ID));
+                quantityValue = cursor.getInt(cursor.getColumnIndex(ItemEntry.COLUMN_ITEM_QUANTITY));
+                // If quantity is greater than 0, decrease the quantity by 1 and update, the db and swap the cursor
+                if (quantityValue > 0) {
+                    quantityValue = quantityValue - 1;
+                    ContentValues values = new ContentValues();
+                    values.put(ItemEntry.COLUMN_ITEM_QUANTITY, quantityValue);
+
+                    Uri updateUri = ContentUris.withAppendedId(ItemEntry.CONTENT_URI, itemId);
+                    context.getContentResolver().update(updateUri, values, null, null);
+                    swapCursor(cursor);
+                }
+            }
+        });
     }
 }
