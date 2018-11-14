@@ -8,16 +8,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -34,20 +35,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     // Content URI for the existing item (null if it's a new item)
     private Uri mCurrentItemUri;
 
-    /** EditText field to enter the item's name */
+    // EditText fields
     private EditText mNameEditText;
-
-    /** EditText field to enter the item's price */
     private EditText mPriceEditText;
-
-    /** EditText field to enter the item's quantity */
     private EditText mQuantityEditText;
-
-    /** EditText field to enter the item's supplier name */
     private EditText mSupplierNameEditText;
-
-    /** EditText field to enter the item's supplier phone number */
     private EditText mSupplierPhoneEditText;
+
+    // Buttons
+    private Button mIncreaseQuantityButton;
+    private Button mDecreaseQuantityButton;
+    private Button mCallSupplierButton;
 
     /** Boolean flag that keeps track of whether the item has been edited (true) or not (false) */
     private boolean mItemHasChanged = false;
@@ -96,6 +94,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText = (EditText) findViewById(R.id.edit_item_quantity);
         mSupplierNameEditText = (EditText) findViewById(R.id.edit_item_supplier_name);
         mSupplierPhoneEditText = (EditText) findViewById(R.id.edit_item_supplier_phone);
+        mIncreaseQuantityButton = (Button) findViewById(R.id.quantity_add_button);
+        mDecreaseQuantityButton = (Button) findViewById(R.id.quantity_subtract_button);
+        mCallSupplierButton = (Button) findViewById(R.id.button_order_item);
 
         // Setup OnTouchListeners on all the input fields, so we can determine if the user
         // has touched or modified them. This will let us know if there are unsaved changes
@@ -105,6 +106,33 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mQuantityEditText.setOnTouchListener(mTouchListener);
         mSupplierNameEditText.setOnTouchListener(mTouchListener);
         mSupplierPhoneEditText.setOnTouchListener(mTouchListener);
+
+        mIncreaseQuantityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                increaseQuantity();
+            }
+        });
+
+        mDecreaseQuantityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                decreaseQuantity();
+            }
+        });
+
+        //Set an intent to call the supplier when phone button is clicked
+        mCallSupplierButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String supplierPhoneString = mSupplierPhoneEditText.getText().toString().trim();
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", supplierPhoneString, null));
+                if(intent.resolveActivity(getPackageManager()) != null){
+                    startActivity(intent);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -113,6 +141,35 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         // This adds menu items to the app bar.
         getMenuInflater().inflate(R.menu.menu_editor, menu);
         return true;
+    }
+
+    /*
+     * Increase quantity
+     */
+    public String increaseQuantity() {
+        int currentQuantity;
+        String currentValue = mQuantityEditText.getText().toString();
+        if (currentValue.equalsIgnoreCase("")) {
+            currentQuantity = 0;
+        } else {
+            currentQuantity = Integer.parseInt(currentValue);
+        }
+        currentQuantity = currentQuantity + 1;
+        return String.valueOf(currentQuantity);
+    }
+
+    /*
+     * Decrease quantity and validate that quantity does not go below zero
+     */
+    public String decreaseQuantity() {
+        int currentQuantity;
+        String currentValue = mQuantityEditText.getText().toString();
+        currentQuantity = Integer.parseInt(currentValue);
+        if (currentQuantity == 1) {
+            Toast.makeText(this, "Cannot have inventory of zero - item will be deleted on saving", Toast.LENGTH_SHORT).show();
+        }
+        currentQuantity = currentQuantity - 1;
+        return String.valueOf(currentQuantity);
     }
 
     /**
@@ -418,7 +475,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mPriceEditText.setText(price);
             mQuantityEditText.setText(quantity);
             mSupplierNameEditText.setText(supplierName);
-            mSupplierPhoneEditText.setText(supplierPhone);
+
+            //Format and set the supplier's phone number
+            String formattedNumber = PhoneNumberUtils.formatNumber(supplierPhone);
+            mSupplierPhoneEditText.setText(formattedNumber);
         }
     }
 
